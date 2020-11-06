@@ -10,6 +10,7 @@ import Likes from './models/Likes';
 import * as searchView from './views/searchView';
 import * as recipeView from './views/recipeView';
 import * as listView from './views/listView';
+import * as likesView from './views/likesView';
 
 import { elements, renderLoader, clearLoader } from './views/base';
 
@@ -73,7 +74,6 @@ elements.searchResPages.addEventListener('click', e => {
 const controlRecipe = async () => {
   // Get ID from url
   const id = window.location.hash.replace('#', '');
-  console.log(id);
 
   if (id) {
     // Prepare UI for changes
@@ -98,8 +98,9 @@ const controlRecipe = async () => {
 
       // Render recipe
       clearLoader();
-      recipeView.renderRecipe(state.recipe);
+      recipeView.renderRecipe(state.recipe, state.likes.isLiked(id));
     } catch (err) {
+      console.log(err);
       alert('Error processing recipe!');
     }
   }
@@ -129,7 +130,7 @@ elements.shopping.addEventListener('click', e => {
   if (e.target.matches('.shopping__delete, .shopping__delete *')) {
     // Delete from state
     state.list.deleteItem(id);
-    
+
     // Delete from UI
     listView.deleteItem(id);
     // Handle count update
@@ -143,6 +144,10 @@ elements.shopping.addEventListener('click', e => {
 /**
  * LIKE CONTROLLER
  */
+
+ // TESTING
+state.likes = new Likes();
+likesView.toggleLikeMenu(state.likes.getNumLikes());
 
 const controlLike = () => {
   if (!state.likes) state.likes = new Likes();
@@ -158,21 +163,20 @@ const controlLike = () => {
       state.recipe.img,
     );
     // Toggle the like button
-
+    likesView.toggleLikeBtn(true);
     // Add like to the UI list
-    console.log(state.likes);
-    // Use HAS  liked current recipe
+    likesView.renderLike(newLike);
+    // User HAS  liked current recipe
 
   } else {
     // Remove like from the state
     state.likes.deleteLike(currentID);
     // Toggle the like button
-
+    likesView.toggleLikeBtn(false);
     // Remove like from the UI list
-    console.log(state.likes);
-
+    likesView.deleteLike(currentID);
   }
-
+  likesView.toggleLikeMenu(state.likes.getNumLikes());
 }
 
 // Handling recipe button clicks
@@ -193,8 +197,8 @@ elements.recipe.addEventListener('click', e => {
   } else if (e.target.matches('.recipe__love, .recipe__love *')) {
     // Like controller
     controlLike();
-  } 
-  
+  }
+
 });
 
 window.l = new List();
